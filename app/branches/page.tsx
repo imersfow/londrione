@@ -42,6 +42,7 @@ type Branch = {
   delivery_radius_km: number | null;
   service_area_text: string | null;
   opening_hours: string | null;
+  homepage_image_url: string | null;
 };
 
 const init = {
@@ -66,6 +67,7 @@ const init = {
   delivery_radius_km: "",
   service_area_text: "",
   opening_hours: "",
+  homepage_image_url: "",
 };
 
 export default function BranchesPage() {
@@ -82,7 +84,7 @@ export default function BranchesPage() {
     setTenantId(ctx.tenantId);
     const { data, error } = await supabase
       .from("branches")
-      .select("id,name,code,phone,email,address,city,province,is_main,is_active,public_visible,show_public_prices,show_public_estimates,pickup_enabled,delivery_enabled,pickup_delivery_enabled,pickup_fee,delivery_fee,pickup_delivery_fee,pickup_min_order,delivery_min_order,delivery_radius_km,service_area_text,opening_hours")
+      .select("id,name,code,phone,email,address,city,province,is_main,is_active,public_visible,show_public_prices,show_public_estimates,pickup_enabled,delivery_enabled,pickup_delivery_enabled,pickup_fee,delivery_fee,pickup_delivery_fee,pickup_min_order,delivery_min_order,delivery_radius_km,service_area_text,opening_hours,homepage_image_url")
       .eq("tenant_id", ctx.tenantId)
       .order("is_main", { ascending: false })
       .order("name");
@@ -120,6 +122,7 @@ export default function BranchesPage() {
       delivery_radius_km: form.delivery_radius_km ? Number(form.delivery_radius_km) : null,
       service_area_text: form.service_area_text.trim() || null,
       opening_hours: form.opening_hours.trim() || null,
+      homepage_image_url: form.homepage_image_url.trim() || null,
     };
 
     const result = editing
@@ -156,6 +159,7 @@ export default function BranchesPage() {
       delivery_radius_km: row.delivery_radius_km == null ? "" : String(row.delivery_radius_km),
       service_area_text: row.service_area_text || "",
       opening_hours: row.opening_hours || "",
+      homepage_image_url: row.homepage_image_url || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -221,6 +225,23 @@ export default function BranchesPage() {
                 {switchRow("Tampilkan Cabang", "Cabang ini boleh muncul di homepage publik.", form.public_visible, (value) => setForm({ ...form, public_visible: value }))}
                 {switchRow("Tampilkan Harga", "Harga cabang boleh ditampilkan publik.", form.show_public_prices, (value) => setForm({ ...form, show_public_prices: value }))}
                 {switchRow("Tampilkan Estimasi", "Estimasi pengerjaan boleh ditampilkan publik.", form.show_public_estimates, (value) => setForm({ ...form, show_public_estimates: value }))}
+                <div className="pt-2">
+                  <label className="label">URL Image Hero Cabang (opsional)</label>
+                  <input
+                    className="input"
+                    type="url"
+                    placeholder="https://domain.com/foto-cabang.jpg"
+                    value={form.homepage_image_url}
+                    onChange={(e) => setForm({ ...form, homepage_image_url: e.target.value })}
+                  />
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Jika diisi, card hero homepage akan menampilkan foto cabang. Jika kosong, otomatis kembali ke card informasi teks.</p>
+                  {form.homepage_image_url && (
+                    <div
+                      className="mt-3 h-32 rounded-2xl bg-cover bg-center ring-1 ring-white/80"
+                      style={{ backgroundImage: `linear-gradient(180deg, rgba(15,23,42,.05), rgba(15,23,42,.18)), url("${form.homepage_image_url.replace(/"/g, "%22")}")` }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
 

@@ -81,16 +81,36 @@ export function PublicHomepage({ data }: { data: PublicHomepageData }) {
               </div>
               {branch && <div className="mt-7 flex flex-wrap gap-3 text-sm text-slate-600"><span className="public-chip"><MapPin size={14}/>{branch.name}</span>{branch.opening_hours && <span className="public-chip"><Clock3 size={14}/>{branch.opening_hours}</span>}{branch.pickup_enabled && <span className="public-chip"><Bike size={14}/>Pickup tersedia</span>}{branch.delivery_enabled && <span className="public-chip"><Truck size={14}/>Delivery tersedia</span>}</div>}
             </div>
-            <div className="public-hero-card">
-              <div className="text-xs font-black uppercase tracking-[.18em] text-slate-500">Cabang Aktif</div>
-              <div className="mt-2 text-2xl font-black">{branch?.name || "Cabang Utama"}</div>
-              <div className="mt-2 text-sm leading-6 text-slate-500">{branchAddress(branch) || "Alamat cabang dapat diatur dari dashboard."}</div>
-              <div className={`mt-5 grid gap-3 ${hasMultipleBranches ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2" : "grid-cols-1"}`}>
-                <div className="public-mini-card"><PackageCheck size={18}/><div><div className="font-black">{services.length}</div><div className="text-xs text-slate-500">Layanan publik</div></div></div>
-                {hasMultipleBranches && <div className="public-mini-card"><Shirt size={18}/><div><div className="font-black">{branches.length}</div><div className="text-xs text-slate-500">Cabang tersedia</div></div></div>}
+            {branch?.homepage_image_url ? (
+              <div
+                className="public-hero-card relative min-h-[340px] overflow-hidden bg-cover bg-center !p-0"
+                style={{
+                  backgroundImage: `linear-gradient(180deg, rgba(15,23,42,.08) 15%, rgba(15,23,42,.76) 100%), url("${branch.homepage_image_url.replace(/"/g, "%22")}")`,
+                }}
+              >
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                  <div className="text-xs font-black uppercase tracking-[.18em] text-white/70">Cabang Aktif</div>
+                  <div className="mt-2 text-2xl font-black">{branch.name || "Cabang Utama"}</div>
+                  {branchAddress(branch) && <div className="mt-2 text-sm leading-6 text-white/80">{branchAddress(branch)}</div>}
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+                    {services.length > 0 && <span className="rounded-full bg-white/15 px-3 py-2 backdrop-blur"><PackageCheck size={13} className="mr-1 inline"/>{services.length} layanan</span>}
+                    {branch.pickup_enabled && <span className="rounded-full bg-white/15 px-3 py-2 backdrop-blur"><Bike size={13} className="mr-1 inline"/>Pickup</span>}
+                    {branch.delivery_enabled && <span className="rounded-full bg-white/15 px-3 py-2 backdrop-blur"><Truck size={13} className="mr-1 inline"/>Delivery</span>}
+                  </div>
+                </div>
               </div>
-              {(branch?.pickup_enabled || branch?.delivery_enabled) && <div className="mt-5 rounded-2xl bg-white/60 p-4 text-sm text-slate-600 ring-1 ring-white/80"><b className="text-slate-800">Antar jemput:</b> {[branch.pickup_enabled ? "Pickup" : "", branch.delivery_enabled ? "Delivery" : ""].filter(Boolean).join(" & ")}{branch.service_area_text ? ` • ${branch.service_area_text}` : ""}{branch.delivery_radius_km ? ` • Radius ${branch.delivery_radius_km} km` : ""}</div>}
-            </div>
+            ) : (
+              <div className="public-hero-card">
+                <div className="text-xs font-black uppercase tracking-[.18em] text-slate-500">Cabang Aktif</div>
+                <div className="mt-2 text-2xl font-black">{branch?.name || "Cabang Utama"}</div>
+                <div className="mt-2 text-sm leading-6 text-slate-500">{branchAddress(branch) || "Alamat cabang dapat diatur dari dashboard."}</div>
+                <div className={`mt-5 grid gap-3 ${hasMultipleBranches ? "sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2" : "grid-cols-1"}`}>
+                  <div className="public-mini-card"><PackageCheck size={18}/><div><div className="font-black">{services.length}</div><div className="text-xs text-slate-500">Layanan publik</div></div></div>
+                  {hasMultipleBranches && <div className="public-mini-card"><Shirt size={18}/><div><div className="font-black">{branches.length}</div><div className="text-xs text-slate-500">Cabang tersedia</div></div></div>}
+                </div>
+                {(branch?.pickup_enabled || branch?.delivery_enabled) && <div className="mt-5 rounded-2xl bg-white/60 p-4 text-sm text-slate-600 ring-1 ring-white/80"><b className="text-slate-800">Antar jemput:</b> {[branch.pickup_enabled ? "Pickup" : "", branch.delivery_enabled ? "Delivery" : ""].filter(Boolean).join(" & ")}{branch.service_area_text ? ` • ${branch.service_area_text}` : ""}{branch.delivery_radius_km ? ` • Radius ${branch.delivery_radius_km} km` : ""}</div>}
+              </div>
+            )}
           </div>
         </section>
 

@@ -21,6 +21,7 @@ export type HomepageBranch = {
   service_area_text?: string | null;
   show_public_prices?: boolean;
   show_public_estimates?: boolean;
+  homepage_image_url?: string | null;
 };
 
 export type HomepageService = {
@@ -195,6 +196,7 @@ export function renderCustomHomepageHtml(html: string, data: PublicHomepageData)
     "{{branch_email}}": branch?.email ?? "",
     "{{branch_address}}": branch?.address ?? "",
     "{{branch_city}}": branch?.city ?? "",
+    "{{branch_image_url}}": branch?.homepage_image_url ?? "",
   };
   return Object.entries(replacements).reduce((output, [key, value]) => output.split(key).join(value), html);
 }
