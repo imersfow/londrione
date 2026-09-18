@@ -15,6 +15,7 @@ const accessMap: Array<{ prefix: string; roles: string[] }> = [
   { prefix: "/expenses", roles: ["owner", "admin", "manager"] },
   { prefix: "/staff", roles: ["owner", "admin"] },
   { prefix: "/notifications", roles: ["owner", "admin"] },
+  { prefix: "/homepage", roles: ["owner", "admin"] },
   { prefix: "/settings", roles: ["owner", "admin"] },
 ];
 
