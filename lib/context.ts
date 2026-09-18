@@ -8,7 +8,7 @@ export async function getAppContext() {
 
   const { data: membership } = await supabase
     .from("tenant_memberships")
-    .select("tenant_id, role, status, tenants(id,name,slug,logo_url,currency,timezone,theme_config)")
+    .select("tenant_id, role, status, tenants(id,name,slug,app_name,app_tagline,logo_url,favicon_url,currency,timezone,theme_config)")
     .eq("user_id", user.id)
     .eq("status", "active")
     .limit(1)

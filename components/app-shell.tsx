@@ -23,9 +23,12 @@ const items = [
   { href:"/settings", label:"Pengaturan", icon:Settings, roles:["owner","admin"] },
 ] as const;
 
-export function AppShell({ children, tenantName, role, theme }: {
+export function AppShell({ children, tenantName, appName, appTagline, logoUrl, role, theme }: {
   children: React.ReactNode;
   tenantName: string;
+  appName: string;
+  appTagline: string;
+  logoUrl: string | null;
   role: string;
   theme: ThemeConfig;
 }) {
@@ -53,10 +56,12 @@ export function AppShell({ children, tenantName, role, theme }: {
         style={{ backgroundImage: "linear-gradient(135deg,var(--sidebar-from),var(--sidebar-to))" }}
       >
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 text-xl font-black">L</div>
-          <div><div className="text-xl font-black">LondriOne</div><div className="text-[10px] uppercase tracking-[.18em] text-white/70">Laundry OS</div></div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/20 text-xl font-black">
+            {logoUrl ? <img src={logoUrl} alt={appName} className="h-full w-full object-cover" /> : (appName.trim().charAt(0).toUpperCase() || "L")}
+          </div>
+          <div className="min-w-0"><div className="truncate text-xl font-black">{appName}</div><div className="text-[10px] uppercase tracking-[.18em] text-white/70">Laundry OS</div></div>
         </div>
-        <div className="mt-4 text-xs leading-5 text-white/80">The Operating System for Modern Laundry Business.</div>
+        <div className="mt-4 text-xs leading-5 text-white/80">{appTagline}</div>
       </div>
       <div className="theme-card theme-card-7 mb-4 px-3 py-3">
         <div className="truncate text-sm font-bold">{tenantName}</div><div className="mt-0.5 text-xs capitalize text-slate-500">Akses: {role}</div>
