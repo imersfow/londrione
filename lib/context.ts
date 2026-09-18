@@ -16,6 +16,9 @@ export async function getAppContext() {
 
   if (!membership) redirect("/onboarding");
 
+  const { data: otpVerified, error: otpError } = await supabase.rpc("is_current_session_otp_verified");
+  if (!otpError && otpVerified === false) redirect("/auth/otp");
+
   const tenantId = membership.tenant_id as string;
   const { data: branches } = await supabase
     .from("branches")
