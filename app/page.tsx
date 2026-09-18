@@ -1,2 +1,7 @@
 import { redirect } from "next/navigation";
-export default function Home() { redirect("/dashboard"); }
+import { installationHasOwner } from "@/lib/server-auth";
+
+export default async function Home() {
+  if (!(await installationHasOwner())) redirect("/setup");
+  redirect("/dashboard");
+}

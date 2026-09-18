@@ -2,43 +2,39 @@
 
 **The Operating System for Modern Laundry Business.**
 
-Stack: Next.js + Supabase + Vercel + GitHub.
+Full source code white-label laundry operating system built with Next.js + Supabase + Vercel + GitHub.
 
-## Frontend Phase 2
+## Deployment model
+- One installation = one laundry business.
+- Multi-branch remains supported inside one installation.
+- Owner first account is created only through `/setup` on a fresh installation.
+- After an Owner exists, public registration is not used; Owner/Admin creates staff from **Staff & Akses**.
+- Staff roles: Owner, Admin, Manager, Cashier, Production, Courier.
+- Branch access is assigned per staff account.
+- Recommended operational target in documentation: up to ~20 branches per installation, not a hard technical limit.
+
+## Current modules
 - Owner Command Center dashboard
-- Multi-branch management
-- Customer CRM CRUD
-- Laundry service CRUD
-- Multi-item order entry
+- Orders / POS foundation
 - Production board
-- Order workflow + payments + status history
-- Expense recording + void
-- BYOK notification settings: Fonnte, StarSender, Mailketing, SMTP, Gmail, Telegram
-- Notification template editor
-- Business settings
-- Responsive desktop/mobile navigation
+- Customers
+- Services and branch pricing foundation
+- Branch management
+- Expenses
+- Staff & role/branch access management
+- Notification gateway settings
+- Optional multi-channel login OTP
+- Forgot/reset password
 
 ## Environment
-Copy `.env.example` and configure:
+Configure in Vercel/server environment:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY` (server-only, never expose in browser/GitHub)
 
-Never expose a Supabase secret/service-role key in browser code or GitHub.
+## Security after first setup
+For a production installation, disable public email sign-ups in Supabase Auth. Staff creation uses the server-side Supabase Admin API, so public sign-up is not required.
 
-## Phase 2.1 Auth Complete
-
-Tambahan:
-- Register: nama, WhatsApp, email, password + konfirmasi.
-- Forgot password + reset password via Supabase Auth email.
-- Login OTP opsional setelah password berhasil.
-- User hanya melihat channel OTP yang benar-benar aktif/configured dan memiliki target: WhatsApp / Email / Telegram.
-- Owner/Admin mengatur `Require OTP on Login`, channel yang diizinkan, expiry, cooldown, dan max attempts dari menu Notifikasi.
-- OTP 6 digit disimpan sebagai bcrypt hash di schema `private`, tidak plaintext.
-- Provider OTP mengikuti BYOK tenant: Fonnte/StarSender, Mailketing/SMTP/Gmail, Telegram.
-
-### Wajib sebelum mengaktifkan OTP
-1. Jalankan `supabase_auth_otp_phase2_1.sql` di Supabase SQL Editor.
-2. Tambahkan Vercel server-only environment variable `SUPABASE_SECRET_KEY` dengan Supabase Secret Key yang sudah di-rotate. JANGAN memakai prefix `NEXT_PUBLIC_`.
-3. Redeploy Vercel setelah environment variable ditambahkan.
-4. Pastikan minimal satu Notification Channel aktif dan credential configured sebelum menyalakan Require OTP.
+## Next blueprint stage
+White-label settings + optional dynamic public homepage + custom HTML homepage.

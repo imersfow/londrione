@@ -14,7 +14,7 @@ export async function getAppContext() {
     .limit(1)
     .maybeSingle();
 
-  if (!membership) redirect("/onboarding");
+  if (!membership) redirect("/no-access");
 
   const { data: otpVerified, error: otpError } = await supabase.rpc("is_current_session_otp_verified");
   if (!otpError && otpVerified === false) redirect("/auth/otp");
