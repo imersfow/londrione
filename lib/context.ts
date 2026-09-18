@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 
-export async function getAppContext() {
+export const getAppContext = cache(async function getAppContext() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -28,4 +29,4 @@ export async function getAppContext() {
     .order("is_main", { ascending: false });
 
   return { supabase, user, membership, tenantId, branches: branches ?? [] };
-}
+});

@@ -9,7 +9,7 @@ const lanes = ["received","washing","drying","ironing","ready","out_for_delivery
 
 export default function ProductionPage(){
   const supabase=createClient(); const[rows,setRows]=useState<any[]>([]); const[loading,setLoading]=useState(true);
-  async function load(){setLoading(true);const{data:{user}}=await supabase.auth.getUser();if(!user)return;const{data:m}=await supabase.from("tenant_memberships").select("tenant_id").eq("user_id",user.id).eq("status","active").limit(1).maybeSingle();if(!m)return;const{data}=await supabase.from("orders").select("id,order_number,customer_name,status,promised_at,created_at,branches(name)").eq("tenant_id",m.tenant_id).in("status",lanes).is("deleted_at",null).order("created_at",{ascending:true}).limit(100);setRows(data??[]);setLoading(false)}
+  async function load(){setLoading(true);const{data:{session}}=await supabase.auth.getSession();const user=session?.user;if(!user)return;const{data:m}=await supabase.from("tenant_memberships").select("tenant_id").eq("user_id",user.id).eq("status","active").limit(1).maybeSingle();if(!m)return;const{data}=await supabase.from("orders").select("id,order_number,customer_name,status,promised_at,created_at,branches(name)").eq("tenant_id",m.tenant_id).in("status",lanes).is("deleted_at",null).order("created_at",{ascending:true}).limit(100);setRows(data??[]);setLoading(false)}
   useEffect(()=>{load()},[]);
   async function move(id:string,status:string){await supabase.rpc("update_order_status",{p_order_id:id,p_status:status});load()}
   const grouped=useMemo(()=>Object.fromEntries(lanes.map(s=>[s,rows.filter(r=>r.status===s)])),[rows]);

@@ -34,7 +34,7 @@ export default function SettingsPage(){
   const[saving,setSaving]=useState(false);
 
   async function load(){
-    const{data:{user}}=await supabase.auth.getUser();if(!user)return;
+    const{data:{session}}=await supabase.auth.getSession();const user=session?.user;if(!user)return;
     const{data:m}=await supabase.from("tenant_memberships").select("tenant_id,role").eq("user_id",user.id).eq("status","active").limit(1).maybeSingle();if(!m)return;
     setTenantId(m.tenant_id);setRole(m.role);
     const{data:t}=await supabase.from("tenants").select("name,slug,app_name,app_tagline,logo_url,favicon_url,currency,timezone,order_prefix,status,theme_config").eq("id",m.tenant_id).single();
