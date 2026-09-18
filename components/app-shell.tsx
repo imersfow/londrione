@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import { clearBrowserAppContext } from "@/lib/browser-context";
 import { themeCssVars, type ThemeConfig } from "@/lib/theme";
 import {
   LayoutDashboard, ShoppingBag, Users, Sparkles, GitBranch, WalletCards,
   Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const items = [
   { href:"/dashboard", label:"Dashboard", icon:LayoutDashboard, roles:["owner","admin","manager","cashier","production","courier"] },
@@ -36,13 +37,23 @@ export function AppShell({ children, tenantName, appName, appTagline, logoUrl, r
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const supabase = createClient();
-  const visibleItems = items.filter((item)=>(item.roles as readonly string[]).includes(role));
+  const visibleItems = useMemo(
+    () => items.filter((item)=>(item.roles as readonly string[]).includes(role)),
+    [role]
+  );
   const mobileItems = visibleItems.slice(0,5);
   const canCreateOrder = ["owner","admin","manager","cashier"].includes(role);
 
+  useEffect(() => {
+    visibleItems.forEach((item) => router.prefetch(item.href));
+    if (canCreateOrder) router.prefetch("/orders/new");
+  }, [router, visibleItems, canCreateOrder]);
+
   async function logout() {
+    clearBrowserAppContext();
     await supabase.auth.signOut();
-    router.replace("/login"); router.refresh();
+    router.replace("/login");
+    router.refresh();
   }
 
   function active(href: string) {
