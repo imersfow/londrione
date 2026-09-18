@@ -35,3 +35,48 @@ button, input, select, textarea { font: inherit; }
   .badge-danger { @apply inline-flex rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700; }
   .section-title { @apply text-base font-bold text-slate-900; }
 }
+
+/* LondriOne dynamic white-label theme foundation */
+.app-theme {
+  --brand-primary: #7c3aed;
+  --brand-secondary: #0ea5e9;
+  --sidebar-from: #6d28d9;
+  --sidebar-to: #0ea5e9;
+  --page-glow-1: #7c3aed;
+  --page-glow-2: #0ea5e9;
+  --card-1-from: #f5f3ff; --card-1-to: #e0f2fe;
+  --card-2-from: #e0f2fe; --card-2-to: #ecfeff;
+  --card-3-from: #fff7ed; --card-3-to: #fef3c7;
+  --card-4-from: #ecfdf5; --card-4-to: #ccfbf1;
+  --card-5-from: #fdf2f8; --card-5-to: #f5f3ff;
+  --card-6-from: #ecfeff; --card-6-to: #e0f2fe;
+  --card-7-from: #eef2ff; --card-7-to: #f5f3ff;
+  --card-8-from: #f7fee7; --card-8-to: #ecfdf5;
+  background:
+    radial-gradient(circle at 4% 4%, color-mix(in srgb, var(--page-glow-1) 12%, transparent), transparent 27%),
+    radial-gradient(circle at 96% 7%, color-mix(in srgb, var(--page-glow-2) 11%, transparent), transparent 27%),
+    linear-gradient(180deg, #fbfcff 0%, #f4f7fb 100%);
+}
+
+.theme-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,.88);
+  box-shadow: 0 10px 35px rgba(15,23,42,.045);
+  backdrop-filter: blur(14px);
+}
+.theme-card-1 { background-image: linear-gradient(135deg,var(--card-1-from),var(--card-1-to)); }
+.theme-card-2 { background-image: linear-gradient(135deg,var(--card-2-from),var(--card-2-to)); }
+.theme-card-3 { background-image: linear-gradient(135deg,var(--card-3-from),var(--card-3-to)); }
+.theme-card-4 { background-image: linear-gradient(135deg,var(--card-4-from),var(--card-4-to)); }
+.theme-card-5 { background-image: linear-gradient(135deg,var(--card-5-from),var(--card-5-to)); }
+.theme-card-6 { background-image: linear-gradient(135deg,var(--card-6-from),var(--card-6-to)); }
+.theme-card-7 { background-image: linear-gradient(135deg,var(--card-7-from),var(--card-7-to)); }
+.theme-card-8 { background-image: linear-gradient(135deg,var(--card-8-from),var(--card-8-to)); }
+
+.brand-gradient { background-image: linear-gradient(135deg,var(--brand-primary),var(--brand-secondary)); }
+.brand-text, .brand-link { color: var(--brand-primary); }
+.brand-link:hover { color: var(--brand-secondary); }
+
+.app-theme .btn-primary {
+  background-image: linear-gradient(90deg,var(--brand-primary),var(--brand-secondary));
+}
