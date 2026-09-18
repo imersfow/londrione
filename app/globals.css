@@ -269,3 +269,34 @@ button, input, select, textarea { font: inherit; }
   border-color: rgba(255,255,255,.78) !important;
   box-shadow: 0 10px 24px rgba(15,23,42,.045);
 }
+
+/* Stage 2B receipt / cashier print */
+@media print {
+  .print-hidden,
+  aside,
+  header,
+  nav {
+    display: none !important;
+  }
+
+  html,
+  body,
+  .app-theme,
+  main {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .lg\:pl-64 {
+    padding-left: 0 !important;
+  }
+
+  .receipt-sheet {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
