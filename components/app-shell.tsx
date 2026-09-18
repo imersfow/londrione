@@ -7,7 +7,7 @@ import { clearBrowserAppContext } from "@/lib/browser-context";
 import { themeCssVars, type ThemeConfig } from "@/lib/theme";
 import {
   LayoutDashboard, ShoppingBag, Users, Sparkles, GitBranch, WalletCards,
-  Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog, Globe2, Bike
+  Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog, Globe2, Bike, Clock3, BarChart3
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -20,6 +20,8 @@ const items = [
   { href:"/services", label:"Layanan", icon:Sparkles, roles:["owner","admin","manager"] },
   { href:"/branches", label:"Cabang", icon:GitBranch, roles:["owner","admin"] },
   { href:"/expenses", label:"Pengeluaran", icon:WalletCards, roles:["owner","admin","manager"] },
+  { href:"/shifts", label:"Shift Kasir", icon:Clock3, roles:["owner","admin","manager","cashier"] },
+  { href:"/reports", label:"Laporan", icon:BarChart3, roles:["owner","admin","manager"] },
   { href:"/staff", label:"Staff & Akses", icon:UserCog, roles:["owner","admin"] },
   { href:"/notifications", label:"Notifikasi", icon:Bell, roles:["owner","admin"] },
   { href:"/homepage", label:"Homepage", icon:Globe2, roles:["owner","admin"] },

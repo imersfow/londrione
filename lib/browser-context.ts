@@ -52,7 +52,7 @@ export async function getBrowserAppContext(force = false): Promise<BrowserAppCon
     const [{ data: branches }, { data: otpVerified, error: otpError }] = await Promise.all([
       supabase
         .from("branches")
-        .select("id,name,code,is_main,is_active")
+        .select("id,name,code,is_main,is_active,address,phone,email,city,province")
         .eq("tenant_id", tenantId)
         .eq("is_active", true)
         .order("is_main", { ascending: false }),
