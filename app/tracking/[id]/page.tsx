@@ -1,0 +1,1 @@
+export default function TrackingPage(){return <main className="grid min-h-screen place-items-center p-5"><div className="glass max-w-md rounded-3xl p-8 text-center"><div className="text-3xl font-black">LondriOne</div><p className="mt-3 text-slate-500">Public tracking akan diaktifkan setelah policy tracking publik kita tambahkan.</p></div></main>}
