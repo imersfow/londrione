@@ -22,6 +22,16 @@ export type HomepageBranch = {
   show_public_prices?: boolean;
   show_public_estimates?: boolean;
   homepage_image_url?: string | null;
+  online_order_enabled?: boolean;
+  online_pickup_enabled?: boolean;
+  online_dropoff_enabled?: boolean;
+  online_payment_timing?: "after_weighing" | "deposit" | "upfront";
+  online_deposit_amount?: number;
+  public_order_note?: string | null;
+  public_cash_enabled?: boolean;
+  public_transfer_enabled?: boolean;
+  public_qris_enabled?: boolean;
+  public_ewallet_enabled?: boolean;
 };
 
 export type HomepageService = {
@@ -197,6 +207,7 @@ export function renderCustomHomepageHtml(html: string, data: PublicHomepageData)
     "{{branch_address}}": branch?.address ?? "",
     "{{branch_city}}": branch?.city ?? "",
     "{{branch_image_url}}": branch?.homepage_image_url ?? "",
+    "{{online_order_url}}": branch?.online_order_enabled ? `/order-online?branch=${branch.id}` : "",
   };
   return Object.entries(replacements).reduce((output, [key, value]) => output.split(key).join(value), html);
 }

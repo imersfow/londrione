@@ -87,12 +87,16 @@ export default function NewOrderPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
+  const [sourceRequest, setSourceRequest] = useState<any>(null);
+  const [sourceRequestItems, setSourceRequestItems] = useState<any[]>([]);
+  const [sourcePrepared, setSourcePrepared] = useState(false);
 
   const currentBranch = branches.find((branch) => branch.id === branchId) || null;
 
   async function load() {
     const ctx = await getBrowserAppContext();
     if (!ctx) return;
+    const activeRequestId = typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("request") || "") : "";
     setTenantId(ctx.tenantId);
     const [{ data: branchData }, { data: customerData }] = await Promise.all([
       supabase
@@ -112,9 +116,32 @@ export default function NewOrderPage() {
         .limit(500),
     ]);
     const branchRows = (branchData ?? []) as Branch[];
+    const customerRows = (customerData ?? []) as Customer[];
     setBranches(branchRows);
-    setCustomers((customerData ?? []) as Customer[]);
-    if (branchRows[0]) setBranchId(branchRows[0].id);
+    setCustomers(customerRows);
+
+    if (activeRequestId) {
+      const { data: requestRow, error: requestError } = await supabase
+        .from("online_order_requests")
+        .select("*,online_order_request_items(*)")
+        .eq("id", activeRequestId)
+        .eq("tenant_id", ctx.tenantId)
+        .maybeSingle();
+      if (requestError) setError(requestError.message);
+      if (requestRow) {
+        setSourceRequest(requestRow);
+        setSourceRequestItems(requestRow.online_order_request_items ?? []);
+        setBranchId(requestRow.branch_id);
+        setOrderType(requestRow.request_type === "pickup" ? "pickup" : "walk_in");
+        setPickupAddress(requestRow.request_type === "pickup" ? (requestRow.address || "") : "");
+        setLogisticsNotes([`Request online ${requestRow.request_number}`, requestRow.notes].filter(Boolean).join(" • "));
+        const matched = customerRows.find((row) => row.id === requestRow.customer_id || (row.phone && row.phone === requestRow.customer_phone));
+        if (matched) setCustomerId(matched.id);
+        else setQuickCustomer({ full_name: requestRow.customer_name || "", phone: requestRow.customer_phone || "", email: requestRow.customer_email || "", address: requestRow.address || "" });
+      } else if (branchRows[0]) setBranchId(branchRows[0].id);
+    } else if (branchRows[0]) {
+      setBranchId(branchRows[0].id);
+    }
   }
 
   async function loadCatalog(id: string) {
@@ -146,6 +173,24 @@ export default function NewOrderPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchId]);
+
+  useEffect(() => {
+    if (!sourceRequest || sourcePrepared || !catalog.length) return;
+    const prepared = sourceRequestItems
+      .map((row) => {
+        const service = catalog.find((item) => item.service_id === row.service_id);
+        if (!service) return null;
+        return {
+          service_id: row.service_id,
+          quantity: String(Math.max(Number(row.quantity || 1), Number(service.resolved_min_quantity || 0), 0.1)),
+          unit_price: String(service.resolved_price || 0),
+          notes: row.notes || "",
+        } as Item;
+      })
+      .filter(Boolean) as Item[];
+    if (prepared.length) setItems(prepared);
+    setSourcePrepared(true);
+  }, [catalog, sourcePrepared, sourceRequest, sourceRequestItems]);
 
   function serviceFor(id: string) {
     return catalog.find((service) => service.service_id === id);
@@ -248,16 +293,41 @@ export default function NewOrderPage() {
     const payment = Math.max(0, Math.min(Number(paidNow || 0), grand));
     setSaving(true);
 
-    const customer = customers.find((row) => row.id === customerId);
+    let effectiveCustomerId = customerId;
+    let customer = customers.find((row) => row.id === effectiveCustomerId);
+
+    if (!effectiveCustomerId && sourceRequest) {
+      const { data: createdCustomer, error: createdCustomerError } = await supabase
+        .from("customers")
+        .insert({
+          tenant_id: tenantId,
+          full_name: sourceRequest.customer_name,
+          phone: sourceRequest.customer_phone || null,
+          email: sourceRequest.customer_email || null,
+          address: sourceRequest.address || null,
+        })
+        .select("id,full_name,phone,email,address")
+        .single();
+      if (createdCustomerError || !createdCustomer) {
+        setSaving(false);
+        return setError(createdCustomerError?.message || "Gagal membuat pelanggan dari request online.");
+      }
+      effectiveCustomerId = createdCustomer.id;
+      customer = createdCustomer as Customer;
+    }
+
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         tenant_id: tenantId,
         branch_id: branchId,
-        customer_id: customerId || null,
-        customer_name: customer?.full_name || "Walk-in Customer",
-        customer_phone: customer?.phone || null,
+        customer_id: effectiveCustomerId || null,
+        customer_name: customer?.full_name || sourceRequest?.customer_name || "Walk-in Customer",
+        customer_phone: customer?.phone || sourceRequest?.customer_phone || null,
         order_type: orderType,
+        tracking_token: sourceRequest?.public_token || undefined,
+        order_source: sourceRequest ? (sourceRequest.request_type === "pickup" ? "online_pickup" : "online_dropoff") : "cashier",
+        online_request_id: sourceRequest?.id || null,
         promised_at: promisedAt ? new Date(promisedAt).toISOString() : null,
         discount_amount: Number(discount || 0),
         service_fee: Number(serviceFee || 0),
@@ -314,6 +384,13 @@ export default function NewOrderPage() {
       }
     }
 
+    if (sourceRequest?.id) {
+      await supabase
+        .from("online_order_requests")
+        .update({ status: "converted", converted_order_id: order.id })
+        .eq("id", sourceRequest.id);
+    }
+
     setSaving(false);
     router.replace(`/orders/${order.id}`);
     router.refresh();
@@ -332,6 +409,8 @@ export default function NewOrderPage() {
         <div><div className="content-kicker"><ShoppingBag size={14}/> CASHIER POS</div><h1 className="page-title mt-2">Order Baru</h1><p className="muted mt-1">Walk-in cepat, pickup/delivery optional, harga otomatis mengikuti cabang.</p></div>
         <div className="theme-card theme-card-4 px-4 py-3"><div className="text-xs font-bold text-slate-500">Grand Total</div><div className="text-xl font-black">{rupiah(grand)}</div></div>
       </div>
+
+      {sourceRequest && <div className="theme-card theme-card-4 flex flex-wrap items-center justify-between gap-3 p-4"><div><div className="text-xs font-bold uppercase text-slate-400">Konversi Request Online</div><div className="mt-1 font-black">{sourceRequest.request_number} • {sourceRequest.customer_name}</div><div className="text-xs text-slate-500">Data customer, alamat, dan layanan preferensi sudah diprefill. Kasir tetap menimbang dan mengkonfirmasi harga final.</div></div><a href={`/track/${sourceRequest.public_token}`} target="_blank" className="btn-secondary !py-2 text-sm">Buka Tracking</a></div>}
 
       <form onSubmit={submit} className="grid gap-5 xl:grid-cols-[1fr_380px]">
         <div className="space-y-5">

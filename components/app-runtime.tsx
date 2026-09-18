@@ -8,6 +8,7 @@ import { getBrowserAppContext, type BrowserAppContext } from "@/lib/browser-cont
 const accessMap: Array<{ prefix: string; roles: string[] }> = [
   { prefix: "/dashboard", roles: ["owner", "admin", "manager", "cashier", "production", "courier"] },
   { prefix: "/orders", roles: ["owner", "admin", "manager", "cashier", "production", "courier"] },
+  { prefix: "/online-requests", roles: ["owner", "admin", "manager", "cashier", "courier"] },
   { prefix: "/production", roles: ["owner", "admin", "manager", "production"] },
   { prefix: "/customers", roles: ["owner", "admin", "manager", "cashier"] },
   { prefix: "/services", roles: ["owner", "admin", "manager"] },

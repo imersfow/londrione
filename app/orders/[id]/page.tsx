@@ -75,7 +75,7 @@ export default function OrderDetail() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div><div className="flex flex-wrap items-center gap-2"><h1 className="page-title">{order.order_number}</h1><span className={statusClass(order.status)}>{statusLabel[order.status] || order.status}</span><span className={statusClass(order.payment_status)}>{statusLabel[order.payment_status] || order.payment_status}</span></div><p className="muted mt-1">{order.customer_name} • {order.branches?.name} • {String(order.order_type || "walk_in").replace(/_/g, " ")}</p></div>
-        <Link href={`/orders/${id}/receipt`} className="btn-secondary gap-2"><Printer size={16}/> Struk / Print</Link>
+        <div className="flex flex-wrap gap-2">{order?.tracking_token && <Link href={`/track/${order.tracking_token}`} target="_blank" className="btn-primary gap-2"><Clock3 size={16}/> Tracking Customer</Link>}<Link href={`/orders/${id}/receipt`} className="btn-secondary gap-2"><Printer size={16}/> Struk / Print</Link></div>
       </div>
 
       {msg && <div className="rounded-2xl bg-rose-50 p-4 text-sm font-semibold text-rose-600">{msg}</div>}

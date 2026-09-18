@@ -7,13 +7,14 @@ import { clearBrowserAppContext } from "@/lib/browser-context";
 import { themeCssVars, type ThemeConfig } from "@/lib/theme";
 import {
   LayoutDashboard, ShoppingBag, Users, Sparkles, GitBranch, WalletCards,
-  Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog, Globe2
+  Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog, Globe2, Bike
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const items = [
   { href:"/dashboard", label:"Dashboard", icon:LayoutDashboard, roles:["owner","admin","manager","cashier","production","courier"] },
   { href:"/orders", label:"Order", icon:ShoppingBag, roles:["owner","admin","manager","cashier","production","courier"] },
+  { href:"/online-requests", label:"Order Online", icon:Bike, roles:["owner","admin","manager","cashier","courier"] },
   { href:"/production", label:"Produksi", icon:Shirt, roles:["owner","admin","manager","production"] },
   { href:"/customers", label:"Pelanggan", icon:Users, roles:["owner","admin","manager","cashier"] },
   { href:"/services", label:"Layanan", icon:Sparkles, roles:["owner","admin","manager"] },
