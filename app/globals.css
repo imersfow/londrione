@@ -264,7 +264,7 @@ button, input, select, textarea { font: inherit; }
 }
 .app-theme tbody td:first-child { border-radius: .9rem 0 0 .9rem; }
 .app-theme tbody td:last-child { border-radius: 0 .9rem .9rem 0; }
-.app-theme .card .rounded-xl.border.bg-white {
+.app-theme .card [class~="rounded-xl"][class~="border"][class~="bg-white"] {
   background: rgba(255,255,255,.58) !important;
   border-color: rgba(255,255,255,.78) !important;
   box-shadow: 0 10px 24px rgba(15,23,42,.045);
