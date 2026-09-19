@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { sendDirectTenantEvent } from "@/lib/notification-server";
 
 export const dynamic = "force-dynamic";
 
@@ -175,6 +176,26 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: itemError.message }, { status: 400 });
       }
     }
+
+    const origin = new URL(req.url).origin;
+    const { data: tenant } = await admin.from("tenants").select("name").eq("id", branch.tenant_id).maybeSingle();
+    try {
+      await sendDirectTenantEvent({
+        tenantId: branch.tenant_id,
+        eventKey: "online_request_received",
+        targets: { whatsapp: customerPhone, email: customerEmail },
+        vars: {
+          tenant_name: tenant?.name || "Laundry",
+          customer_name: customerName,
+          request_number: requestRow.request_number,
+          request_type: requestType === "pickup" ? "Pickup" : "Drop-off",
+          branch_name: branch.name,
+          tracking_url: `${origin}/track/${requestRow.public_token}`,
+        },
+        referenceType: "online_request",
+        referenceId: requestRow.id,
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

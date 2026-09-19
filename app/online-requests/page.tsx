@@ -74,6 +74,9 @@ export default function OnlineRequestsPage() {
     setMsg("");
     const { error } = await supabase.from("online_order_requests").update({ status: next }).eq("id", id).eq("tenant_id", tenantId);
     if (error) return setMsg(error.message);
+    if (["confirmed","courier_on_the_way","picked_up","arrived"].includes(next)) {
+      fetch("/api/notifications/direct", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ request_id:id, status:next }), keepalive:true }).catch(()=>{});
+    }
     await load();
   }
 

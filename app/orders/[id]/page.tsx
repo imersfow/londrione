@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { rupiah, statusClass, statusLabel, dateTime } from "@/lib/ui";
+import { kickNotificationWorker } from "@/lib/kick-notification-worker";
 import { Banknote, Clock3, MapPin, Printer, Shirt, Truck, UserRound } from "lucide-react";
 
 const statuses = ["received","washing","drying","ironing","ready","out_for_delivery","completed","cancelled"];
@@ -43,6 +44,7 @@ export default function OrderDetail() {
     setMsg("");
     const { error } = await supabase.rpc("update_order_status", { p_order_id: id, p_status: value });
     if (error) setMsg(error.message);
+    else kickNotificationWorker(12);
     await load();
   }
 
@@ -66,6 +68,7 @@ export default function OrderDetail() {
     if (error) return setMsg(error.message);
     setAmount("");
     setRef("");
+    kickNotificationWorker(12);
     await load();
   }
 

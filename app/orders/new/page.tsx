@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { getBrowserAppContext } from "@/lib/browser-context";
 import { rupiah } from "@/lib/ui";
+import { kickNotificationWorker } from "@/lib/kick-notification-worker";
 import {
   Banknote,
   Bike,
@@ -392,6 +393,7 @@ export default function NewOrderPage() {
     }
 
     setSaving(false);
+    kickNotificationWorker(12);
     router.replace(`/orders/${order.id}`);
     router.refresh();
   }
