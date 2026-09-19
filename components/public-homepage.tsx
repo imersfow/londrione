@@ -37,6 +37,7 @@ export function PublicHomepage({ data }: { data: PublicHomepageData }) {
   const appName = data.app_name || businessName;
   const wa = waLink(branch?.phone, `Halo ${businessName}, saya ingin bertanya tentang layanan laundry${branch?.name ? ` di ${branch.name}` : ""}.`);
   const onlineOrderHref = branch?.online_order_enabled ? `/order-online${branch?.id ? `?branch=${branch.id}` : ""}` : null;
+  const orderHrefForService = (serviceId: string) => onlineOrderHref ? `${onlineOrderHref}${onlineOrderHref.includes("?") ? "&" : "?"}service=${serviceId}` : null;
   const heroStyle = config.hero_background_url
     ? {
         backgroundImage: `linear-gradient(135deg, color-mix(in srgb, var(--brand-primary) 82%, transparent), color-mix(in srgb, var(--brand-secondary) 82%, transparent)), url(${config.hero_background_url})`,
@@ -133,7 +134,24 @@ export function PublicHomepage({ data }: { data: PublicHomepageData }) {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="public-section-head"><div><div className="public-kicker">LAYANAN</div><h2>{config.services_title}</h2><p>{config.services_subtitle}</p></div></div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {services.slice(0,12).map((service,index)=><div key={service.id} className="public-service-card" style={{backgroundImage:`linear-gradient(135deg,var(--card-${(index%8)+1}-from),var(--card-${(index%8)+1}-to))`}}><div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/65" style={{color:"var(--brand-primary)"}}><Shirt size={19}/></div><div className="mt-4 text-xs font-black uppercase tracking-[.12em] text-slate-400">{service.category_name}</div><div className="mt-1 text-lg font-black">{service.name}</div><p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">{service.description || "Layanan laundry profesional untuk kebutuhan Anda."}</p>{service.estimated_minutes ? <div className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-slate-600"><Clock3 size={13}/>{formatEstimate(service.estimated_minutes)}</div> : null}</div>)}
+              {services.slice(0,12).map((service,index)=> {
+                const serviceOrderHref = orderHrefForService(service.id);
+                return <div key={service.id} className="public-service-card flex flex-col" style={{backgroundImage:`linear-gradient(135deg,var(--card-${(index%8)+1}-from),var(--card-${(index%8)+1}-to))`}}>
+                  <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/65" style={{color:"var(--brand-primary)"}}><Shirt size={19}/></div>
+                  <div className="mt-4 text-xs font-black uppercase tracking-[.12em] text-slate-400">{service.category_name}</div>
+                  <div className="mt-1 text-lg font-black">{service.name}</div>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">{service.description || "Layanan laundry profesional untuk kebutuhan Anda."}</p>
+                  <div className="mt-auto pt-4">
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        {service.price_visible && service.price != null && <div className="text-base font-black" style={{color:"var(--brand-primary)"}}>{rupiah(service.price)}<span className="ml-1 text-[10px] font-bold text-slate-400">/{service.unit_label || "layanan"}</span></div>}
+                        {service.estimated_minutes ? <div className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-slate-600"><Clock3 size={13}/>{formatEstimate(service.estimated_minutes)}</div> : null}
+                      </div>
+                      {serviceOrderHref && <Link href={serviceOrderHref} className="public-btn-primary !px-3 !py-2 text-xs"><Bike size={14}/>Pesan</Link>}
+                    </div>
+                  </div>
+                </div>;
+              })}
             </div>
           </div>
         </section>}
@@ -142,7 +160,15 @@ export function PublicHomepage({ data }: { data: PublicHomepageData }) {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="public-section-head"><div><div className="public-kicker">HARGA CABANG</div><h2>{config.prices_title}</h2><p>{hasMultipleBranches ? config.prices_subtitle : config.prices_subtitle.replace(/Harga dapat berbeda di setiap cabang\.?/i, "Harga layanan yang tersedia saat ini.")} {hasMultipleBranches && branch ? `Saat ini menampilkan ${branch.name}.` : ""}</p></div></div>
             <div className="space-y-5">
-              {Object.entries(grouped).map(([category, items])=><div key={category} className="public-price-group"><div className="public-price-group-head"><div><div className="text-xs font-black uppercase tracking-[.15em] text-white/75">Kategori</div><div className="mt-1 text-xl font-black text-white">{category}</div></div><div className="rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white">{items.length} layanan</div></div><div className="divide-y divide-slate-100/80">{items.map((service)=><div key={service.id} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto_auto] sm:items-center"><div><div className="font-black">{service.name}</div><div className="mt-1 text-xs text-slate-500">{service.min_quantity ? `Min. ${service.min_quantity} ${service.unit_label || ""}` : service.service_kind === "package" ? "Paket laundry" : `Per ${service.unit_label || "layanan"}`}</div></div><div className="text-sm font-bold text-slate-500">{service.estimated_minutes ? formatEstimate(service.estimated_minutes) : "Estimasi hubungi kami"}</div><div className="text-right"><div className="text-lg font-black" style={{color:"var(--brand-primary)"}}>{service.price_visible && service.price != null ? rupiah(service.price) : "Hubungi Kami"}</div><div className="text-[11px] text-slate-400">{service.price_visible && service.price != null ? `/${service.unit_label || "layanan"}` : "Harga disembunyikan"}</div></div></div>)}</div></div>)}
+              {Object.entries(grouped).map(([category, items])=><div key={category} className="public-price-group"><div className="public-price-group-head"><div><div className="text-xs font-black uppercase tracking-[.15em] text-white/75">Kategori</div><div className="mt-1 text-xl font-black text-white">{category}</div></div><div className="rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white">{items.length} layanan</div></div><div className="divide-y divide-slate-100/80">{items.map((service)=> {
+                const serviceOrderHref = orderHrefForService(service.id);
+                return <div key={service.id} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
+                  <div><div className="font-black">{service.name}</div><div className="mt-1 text-xs text-slate-500">{service.min_quantity ? `Min. ${service.min_quantity} ${service.unit_label || ""}` : service.service_kind === "package" ? "Paket laundry" : `Per ${service.unit_label || "layanan"}`}</div></div>
+                  <div className="text-sm font-bold text-slate-500">{service.estimated_minutes ? formatEstimate(service.estimated_minutes) : "Estimasi hubungi kami"}</div>
+                  <div className="text-right"><div className="text-lg font-black" style={{color:"var(--brand-primary)"}}>{service.price_visible && service.price != null ? rupiah(service.price) : "Hubungi Kami"}</div><div className="text-[11px] text-slate-400">{service.price_visible && service.price != null ? `/${service.unit_label || "layanan"}` : "Harga disembunyikan"}</div></div>
+                  {serviceOrderHref && <Link href={serviceOrderHref} className="public-btn-primary !px-3 !py-2 text-xs"><Bike size={14}/>Pesan</Link>}
+                </div>;
+              })}</div></div>)}
             </div>
           </div>
         </section>}

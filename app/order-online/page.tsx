@@ -15,10 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function OnlineOrderPage({ searchParams }: { searchParams: Promise<{ branch?: string }> }) {
-  const { branch } = await searchParams;
+export default async function OnlineOrderPage({ searchParams }: { searchParams: Promise<{ branch?: string; service?: string }> }) {
+  const { branch, service } = await searchParams;
   const data = await getPublicHomepage(branch || null);
   if (!data?.installed) redirect("/setup");
   if (!data?.selected_branch) redirect("/");
-  return <PublicOnlineOrder data={data}/>;
+  return <PublicOnlineOrder data={data} initialServiceId={service || null}/>;
 }

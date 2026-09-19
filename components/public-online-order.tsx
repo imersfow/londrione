@@ -34,7 +34,7 @@ type SuccessData = {
   payment_preference: string;
 };
 
-export function PublicOnlineOrder({ data }: { data: PublicHomepageData }) {
+export function PublicOnlineOrder({ data, initialServiceId }: { data: PublicHomepageData; initialServiceId?: string | null }) {
   const router = useRouter();
   const theme = normalizeTheme(data.theme_config);
   const branch = data.selected_branch;
@@ -52,7 +52,12 @@ export function PublicOnlineOrder({ data }: { data: PublicHomepageData }) {
   const [notes, setNotes] = useState("");
   const [website, setWebsite] = useState("");
   const [paymentPreference, setPaymentPreference] = useState("after_weighing");
-  const [items, setItems] = useState<SelectedItem[]>([]);
+  const [items, setItems] = useState<SelectedItem[]>(() => {
+    if (!initialServiceId) return [];
+    const service = services.find((row) => row.id === initialServiceId);
+    if (!service) return [];
+    return [{ service_id: service.id, quantity: String(Math.max(Number(service.min_quantity || 1), 1)), notes: "" }];
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<SuccessData | null>(null);
