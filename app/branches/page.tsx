@@ -121,6 +121,57 @@ export default function BranchesPage() {
   const [editing, setEditing] = useState<Branch | null>(null);
   const [msg, setMsg] = useState("");
 
+  function branchToForm(row: Branch) {
+    return {
+      name: row.name,
+      code: row.code || "",
+      phone: row.phone || "",
+      email: row.email || "",
+      address: row.address || "",
+      city: row.city || "",
+      province: row.province || "",
+      public_visible: row.public_visible !== false,
+      show_public_prices: row.show_public_prices !== false,
+      show_public_estimates: row.show_public_estimates !== false,
+      pickup_enabled: row.pickup_enabled === true,
+      delivery_enabled: row.delivery_enabled === true,
+      pickup_delivery_enabled: row.pickup_delivery_enabled === true,
+      pickup_fee: String(row.pickup_fee || 0),
+      delivery_fee: String(row.delivery_fee || 0),
+      pickup_delivery_fee: String(row.pickup_delivery_fee || 0),
+      pickup_min_order: String(row.pickup_min_order || 0),
+      delivery_min_order: String(row.delivery_min_order || 0),
+      delivery_radius_km: row.delivery_radius_km == null ? "" : String(row.delivery_radius_km),
+      service_area_text: row.service_area_text || "",
+      opening_hours: row.opening_hours || "",
+      homepage_image_url: row.homepage_image_url || "",
+      online_order_enabled: row.online_order_enabled === true,
+      online_pickup_enabled: row.online_pickup_enabled !== false,
+      online_dropoff_enabled: row.online_dropoff_enabled !== false,
+      online_payment_timing: row.online_payment_timing || "after_weighing",
+      online_deposit_amount: String(row.online_deposit_amount || 0),
+      public_order_note: row.public_order_note || "",
+      public_cash_enabled: row.public_cash_enabled !== false,
+      public_transfer_enabled: row.public_transfer_enabled === true,
+      public_qris_enabled: row.public_qris_enabled === true,
+      public_ewallet_enabled: row.public_ewallet_enabled === true,
+      bank_name: row.bank_name || "",
+      bank_account_number: row.bank_account_number || "",
+      bank_account_name: row.bank_account_name || "",
+      qris_image_url: row.qris_image_url || "",
+      ewallet_name: row.ewallet_name || "",
+      ewallet_number: row.ewallet_number || "",
+      public_payment_note: row.public_payment_note || "",
+    };
+  }
+
+  function startCreate() {
+    setEditing(null);
+    setForm(init);
+    setMsg("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   async function load() {
     const ctx = await getBrowserAppContext();
     if (!ctx) return;
@@ -132,7 +183,15 @@ export default function BranchesPage() {
       .order("is_main", { ascending: false })
       .order("name");
     if (error) return setMsg(error.message);
-    setRows((data ?? []) as Branch[]);
+    const loaded = (data ?? []) as Branch[];
+    setRows(loaded);
+
+    // Untuk instalasi 1 cabang: langsung masuk mode EDIT agar user
+    // tidak salah mengira setting cabang sebagai form Tambah Cabang.
+    if (loaded.length === 1) {
+      setEditing(loaded[0]);
+      setForm(branchToForm(loaded[0]));
+    }
   }
 
   useEffect(() => {
@@ -199,47 +258,8 @@ export default function BranchesPage() {
 
   function edit(row: Branch) {
     setEditing(row);
-    setForm({
-      name: row.name,
-      code: row.code || "",
-      phone: row.phone || "",
-      email: row.email || "",
-      address: row.address || "",
-      city: row.city || "",
-      province: row.province || "",
-      public_visible: row.public_visible !== false,
-      show_public_prices: row.show_public_prices !== false,
-      show_public_estimates: row.show_public_estimates !== false,
-      pickup_enabled: row.pickup_enabled === true,
-      delivery_enabled: row.delivery_enabled === true,
-      pickup_delivery_enabled: row.pickup_delivery_enabled === true,
-      pickup_fee: String(row.pickup_fee || 0),
-      delivery_fee: String(row.delivery_fee || 0),
-      pickup_delivery_fee: String(row.pickup_delivery_fee || 0),
-      pickup_min_order: String(row.pickup_min_order || 0),
-      delivery_min_order: String(row.delivery_min_order || 0),
-      delivery_radius_km: row.delivery_radius_km == null ? "" : String(row.delivery_radius_km),
-      service_area_text: row.service_area_text || "",
-      opening_hours: row.opening_hours || "",
-      homepage_image_url: row.homepage_image_url || "",
-      online_order_enabled: row.online_order_enabled === true,
-      online_pickup_enabled: row.online_pickup_enabled !== false,
-      online_dropoff_enabled: row.online_dropoff_enabled !== false,
-      online_payment_timing: row.online_payment_timing || "after_weighing",
-      online_deposit_amount: String(row.online_deposit_amount || 0),
-      public_order_note: row.public_order_note || "",
-      public_cash_enabled: row.public_cash_enabled !== false,
-      public_transfer_enabled: row.public_transfer_enabled === true,
-      public_qris_enabled: row.public_qris_enabled === true,
-      public_ewallet_enabled: row.public_ewallet_enabled === true,
-      bank_name: row.bank_name || "",
-      bank_account_number: row.bank_account_number || "",
-      bank_account_name: row.bank_account_name || "",
-      qris_image_url: row.qris_image_url || "",
-      ewallet_name: row.ewallet_name || "",
-      ewallet_number: row.ewallet_number || "",
-      public_payment_note: row.public_payment_note || "",
-    });
+    setForm(branchToForm(row));
+    setMsg("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -261,7 +281,10 @@ export default function BranchesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><div className="content-kicker"><Building2 size={14}/> MULTI BRANCH</div><h1 className="page-title mt-2">Cabang & Operasional</h1><p className="muted mt-1">Atur cabang, pickup/delivery, online order, dan pembayaran publik.</p></div>
-        <div className="theme-card theme-card-2 px-4 py-3"><div className="text-xs font-bold text-slate-500">Cabang aktif</div><div className="text-xl font-black">{rows.filter((r) => r.is_active).length}</div></div>
+        <div className="flex items-center gap-2">
+          <div className="theme-card theme-card-2 px-4 py-3"><div className="text-xs font-bold text-slate-500">Cabang aktif</div><div className="text-xl font-black">{rows.filter((r) => r.is_active).length}</div></div>
+          {rows.length > 0 && <button type="button" onClick={startCreate} className="btn-secondary gap-2"><Plus size={15}/> Tambah Cabang Baru</button>}
+        </div>
       </div>
 
       {msg && <div className="rounded-2xl bg-sky-50 p-4 text-sm font-semibold text-sky-700 ring-1 ring-sky-100">{msg}</div>}
@@ -269,8 +292,8 @@ export default function BranchesPage() {
       <div className="grid gap-5 xl:grid-cols-[500px_1fr]">
         <form onSubmit={save} className="premium-panel h-fit p-5 xl:sticky xl:top-24">
           <div className="premium-form-head flex items-center justify-between">
-            <div className="flex items-center gap-3"><div className="brand-gradient grid h-10 w-10 place-items-center rounded-2xl text-white"><Building2 size={18}/></div><div><h2 className="section-title">{editing ? "Edit Cabang" : "Tambah Cabang"}</h2><p className="text-xs text-slate-500">Setting ini berlaku untuk operasional dan homepage.</p></div></div>
-            {editing && <button type="button" onClick={() => { setEditing(null); setForm(init); }} className="rounded-xl bg-white/70 p-2"><X size={16}/></button>}
+            <div className="flex items-center gap-3"><div className="brand-gradient grid h-10 w-10 place-items-center rounded-2xl text-white"><Building2 size={18}/></div><div><h2 className="section-title">{editing ? (editing.is_main ? "Pengaturan Cabang Utama" : "Edit Cabang") : "Tambah Cabang Baru"}</h2><p className="text-xs text-slate-500">{editing ? "Ubah setting cabang lalu klik Simpan Perubahan." : "Isi data untuk membuat cabang baru."}</p></div></div>
+            {editing && rows.length > 1 && <button type="button" onClick={startCreate} className="rounded-xl bg-white/70 p-2" title="Tambah cabang baru"><Plus size={16}/></button>}
           </div>
 
           <div className="space-y-4">
@@ -289,7 +312,7 @@ export default function BranchesPage() {
 
             <div className="rounded-3xl bg-gradient-to-br from-emerald-50/80 to-cyan-50/80 p-4 ring-1 ring-white/80"><div className="mb-3 flex items-center gap-2 font-black"><Banknote size={17}/> Pembayaran Publik</div><div className="grid gap-2 sm:grid-cols-2">{switchRow("Cash", "Bayar tunai saat pickup/drop-off.", form.public_cash_enabled, (v) => setForm({ ...form, public_cash_enabled: v }))}{switchRow("Transfer", "Tampilkan rekening bank.", form.public_transfer_enabled, (v) => setForm({ ...form, public_transfer_enabled: v }))}{switchRow("QRIS", "Tampilkan URL gambar QRIS.", form.public_qris_enabled, (v) => setForm({ ...form, public_qris_enabled: v }))}{switchRow("E-Wallet", "Tampilkan akun e-wallet.", form.public_ewallet_enabled, (v) => setForm({ ...form, public_ewallet_enabled: v }))}</div>{form.public_transfer_enabled && <div className="mt-3 grid gap-3 sm:grid-cols-3"><input className="input" placeholder="Bank" value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })}/><input className="input" placeholder="Nomor rekening" value={form.bank_account_number} onChange={(e) => setForm({ ...form, bank_account_number: e.target.value })}/><input className="input" placeholder="Atas nama" value={form.bank_account_name} onChange={(e) => setForm({ ...form, bank_account_name: e.target.value })}/></div>}{form.public_qris_enabled && <input className="input mt-3" placeholder="URL image QRIS" value={form.qris_image_url} onChange={(e) => setForm({ ...form, qris_image_url: e.target.value })}/>} {form.public_ewallet_enabled && <div className="mt-3 grid gap-3 sm:grid-cols-2"><input className="input" placeholder="Nama e-wallet" value={form.ewallet_name} onChange={(e) => setForm({ ...form, ewallet_name: e.target.value })}/><input className="input" placeholder="Nomor e-wallet" value={form.ewallet_number} onChange={(e) => setForm({ ...form, ewallet_number: e.target.value })}/></div>}<textarea className="input mt-3 min-h-20" placeholder="Catatan pembayaran publik (opsional)" value={form.public_payment_note} onChange={(e) => setForm({ ...form, public_payment_note: e.target.value })}/></div>
 
-            <button className="btn-primary w-full gap-2"><Save size={16}/>{editing ? "Simpan Perubahan" : "Tambah Cabang"}</button>
+            <button className="btn-primary w-full gap-2"><Save size={16}/>{editing ? "Simpan Perubahan" : "Tambah Cabang Baru"}</button>
           </div>
         </form>
 
