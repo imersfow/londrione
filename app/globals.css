@@ -423,3 +423,33 @@ button, input, select, textarea { font: inherit; }
 .public-testimonial { border-radius:1.5rem;background:rgba(255,255,255,.8);padding:1.3rem; }
 .public-contact-card { display:flex;flex-direction:column;gap:1.5rem;border-radius:2rem;padding:2rem;background-image:linear-gradient(120deg,var(--brand-primary),var(--brand-secondary));box-shadow:0 30px 70px color-mix(in srgb,var(--brand-primary) 18%,transparent); }
 @media (min-width:768px){ .public-contact-card{flex-direction:row;align-items:center;justify-content:space-between;} }
+
+/* =========================================================
+   Stage 5 - PWA & Mobile Release Polish
+   ========================================================= */
+html { -webkit-tap-highlight-color: transparent; }
+body { overscroll-behavior-y: none; }
+button, a, input, select, textarea { touch-action: manipulation; }
+
+@media (max-width: 767px) {
+  .page-title { font-size: 1.65rem; line-height: 1.15; }
+  .section-title { font-size: .98rem; }
+  .premium-panel, .theme-card, .card, .card-violet, .card-emerald, .card-amber { border-radius: 1.25rem; }
+  .premium-panel > .p-6, .theme-card.p-6 { padding: 1.1rem; }
+  .input { min-height: 44px; }
+  .btn-primary, .btn-secondary, .btn-danger { min-height: 44px; }
+  table { font-size: .82rem; }
+  .public-section { padding: 3.25rem 0; }
+  .public-section-head h2 { font-size: 1.65rem; }
+  .public-contact-card { border-radius: 1.5rem; padding: 1.35rem; }
+}
+
+@media (max-width: 420px) {
+  .app-theme main { padding-left: .8rem; padding-right: .8rem; }
+  .public-btn-primary, .public-btn-secondary { width: 100%; }
+}
+
+@media (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); }
+  .app-theme { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+}

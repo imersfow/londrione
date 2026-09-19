@@ -7,9 +7,10 @@ import { clearBrowserAppContext } from "@/lib/browser-context";
 import { themeCssVars, type ThemeConfig } from "@/lib/theme";
 import {
   LayoutDashboard, ShoppingBag, Users, Sparkles, GitBranch, WalletCards,
-  Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog, Globe2, Bike, Clock3, BarChart3
+  Bell, Settings, LogOut, Menu, X, PlusCircle, Shirt, ChevronRight, UserCog, Globe2, Bike, Clock3, BarChart3, BookOpenCheck, MoreHorizontal
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { PwaInstallButton } from "@/components/pwa-install-button";
 
 const items = [
   { href:"/dashboard", label:"Dashboard", icon:LayoutDashboard, roles:["owner","admin","manager","cashier","production","courier"] },
@@ -25,6 +26,7 @@ const items = [
   { href:"/staff", label:"Staff & Akses", icon:UserCog, roles:["owner","admin"] },
   { href:"/notifications", label:"Notifikasi", icon:Bell, roles:["owner","admin"] },
   { href:"/homepage", label:"Homepage", icon:Globe2, roles:["owner","admin"] },
+  { href:"/guide", label:"Panduan", icon:BookOpenCheck, roles:["owner","admin","manager","cashier","production","courier"] },
   { href:"/settings", label:"Pengaturan", icon:Settings, roles:["owner","admin"] },
 ] as const;
 
@@ -40,12 +42,15 @@ export function AppShell({ children, tenantName, appName, appTagline, logoUrl, r
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const supabase = createClient();
   const visibleItems = useMemo(
     () => items.filter((item)=>(item.roles as readonly string[]).includes(role)),
     [role]
   );
-  const mobileItems = visibleItems.slice(0,5);
+  const preferredMobile = ["/dashboard","/orders","/production","/customers"];
+  const mobileItems = preferredMobile.map((href)=>visibleItems.find((item)=>item.href===href)).filter(Boolean) as typeof visibleItems;
+  const moreItems = visibleItems.filter((item)=>!mobileItems.some((mobile)=>mobile.href===item.href));
   const canCreateOrder = ["owner","admin","manager","cashier"].includes(role);
 
   useEffect(() => {
@@ -81,7 +86,7 @@ export function AppShell({ children, tenantName, appName, appTagline, logoUrl, r
       <div className="theme-card theme-card-7 mb-4 px-3 py-3">
         <div className="truncate text-sm font-bold">{tenantName}</div><div className="mt-0.5 text-xs capitalize text-slate-500">Akses: {role}</div>
       </div>
-      <nav className="space-y-1">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
         {visibleItems.map(({href,label,icon:Icon}) => {
           const isActive = active(href);
           return (
@@ -97,7 +102,7 @@ export function AppShell({ children, tenantName, appName, appTagline, logoUrl, r
           );
         })}
       </nav>
-      <button onClick={logout} className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50"><LogOut size={18}/> Keluar</button>
+      <button onClick={logout} className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50"><LogOut size={18}/> Keluar</button>
     </div>
   );
 
@@ -108,15 +113,17 @@ export function AppShell({ children, tenantName, appName, appTagline, logoUrl, r
     <div className="lg:pl-64">
       <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/70 bg-white/75 px-4 backdrop-blur-xl sm:px-6">
         <div className="flex items-center gap-3"><button className="rounded-xl border border-slate-200 bg-white p-2 lg:hidden" onClick={() => setOpen(true)}><Menu size={20}/></button><div><div className="font-bold text-slate-900">{tenantName}</div><div className="hidden text-xs text-slate-500 sm:block">Operasional laundry real-time</div></div></div>
-        {canCreateOrder && <Link href="/orders/new" className="btn-primary gap-2"><PlusCircle size={18}/> <span className="hidden sm:inline">Order Baru</span><span className="sm:hidden">Order</span></Link>}
+        <div className="flex items-center gap-2"><PwaInstallButton compact/>{canCreateOrder && <Link href="/orders/new" className="btn-primary gap-2"><PlusCircle size={18}/> <span className="hidden sm:inline">Order Baru</span><span className="sm:hidden">Order</span></Link>}</div>
       </header>
       <main className="p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
-    <nav className={`fixed inset-x-3 bottom-3 z-30 grid rounded-2xl border border-white/80 bg-white/90 p-1.5 shadow-xl backdrop-blur-xl lg:hidden ${mobileItems.length===4?"grid-cols-4":mobileItems.length===3?"grid-cols-3":"grid-cols-5"}`}>
-      {mobileItems.map(({href,label,icon:Icon})=>{
-        const isActive=active(href);
-        return <Link key={href} href={href} className={`flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold ${isActive?"text-white":"text-slate-500"}`} style={isActive?{backgroundImage:"linear-gradient(90deg,var(--brand-primary),var(--brand-secondary))"}:undefined}><Icon size={18}/><span>{label}</span></Link>;
-      })}
+    {moreOpen && <div className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm lg:hidden" onClick={()=>setMoreOpen(false)} />}
+    <div className={`fixed inset-x-3 bottom-24 z-50 rounded-3xl border border-white/80 bg-white/95 p-3 shadow-2xl backdrop-blur-xl transition lg:hidden ${moreOpen?"translate-y-0 opacity-100":"pointer-events-none translate-y-5 opacity-0"}`}>
+      <div className="grid max-h-[55vh] grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">{moreItems.map(({href,label,icon:Icon})=>{const isActive=active(href);return <Link key={href} href={href} onClick={()=>setMoreOpen(false)} className={`flex items-center gap-2 rounded-2xl border px-3 py-3 text-sm font-semibold ${isActive?"text-white":"border-slate-100 bg-slate-50 text-slate-600"}`} style={isActive?{backgroundImage:"linear-gradient(90deg,var(--brand-primary),var(--brand-secondary))"}:undefined}><Icon size={18}/><span>{label}</span></Link>})}</div>
+    </div>
+    <nav className="fixed inset-x-3 bottom-3 z-30 grid rounded-2xl border border-white/80 bg-white/92 p-1.5 shadow-xl backdrop-blur-xl lg:hidden" style={{gridTemplateColumns:`repeat(${mobileItems.length+1},minmax(0,1fr))`}}>
+      {mobileItems.map(({href,label,icon:Icon})=>{const isActive=active(href);return <Link key={href} href={href} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold ${isActive?"text-white":"text-slate-500"}`} style={isActive?{backgroundImage:"linear-gradient(90deg,var(--brand-primary),var(--brand-secondary))"}:undefined}><Icon size={18}/><span className="max-w-full truncate">{label}</span></Link>})}
+      <button onClick={()=>setMoreOpen(value=>!value)} className={`flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold ${moreOpen?"text-white":"text-slate-500"}`} style={moreOpen?{backgroundImage:"linear-gradient(90deg,var(--brand-primary),var(--brand-secondary))"}:undefined}><MoreHorizontal size={18}/><span>Lainnya</span></button>
     </nav>
   </div>;
 }

@@ -19,6 +19,7 @@ const accessMap: Array<{ prefix: string; roles: string[] }> = [
   { prefix: "/staff", roles: ["owner", "admin"] },
   { prefix: "/notifications", roles: ["owner", "admin"] },
   { prefix: "/homepage", roles: ["owner", "admin"] },
+  { prefix: "/guide", roles: ["owner", "admin", "manager", "cashier", "production", "courier"] },
   { prefix: "/settings", roles: ["owner", "admin"] },
 ];
 
@@ -86,7 +87,25 @@ export function AppRuntime({ children }: { children: React.ReactNode }) {
     if (!context) return;
     const tenant = context.membership?.tenants as any;
     if (tenant?.app_name) document.title = tenant.app_name;
-    setFavicon(tenant?.favicon_url || tenant?.logo_url || null);
+    const icon = tenant?.favicon_url || tenant?.logo_url || null;
+    setFavicon(icon);
+    if (icon) {
+      let apple = document.querySelector<HTMLLinkElement>("link[rel='apple-touch-icon']");
+      if (!apple) {
+        apple = document.createElement("link");
+        apple.rel = "apple-touch-icon";
+        document.head.appendChild(apple);
+      }
+      apple.href = icon;
+    }
+    const color = context.theme?.primary || "#7C3AED";
+    let meta = document.querySelector<HTMLMetaElement>("meta[name='theme-color']");
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    meta.content = color;
   }, [context]);
 
   if (!rule) return <>{children}</>;
